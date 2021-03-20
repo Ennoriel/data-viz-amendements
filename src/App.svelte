@@ -4,6 +4,6 @@
 	import Test from './components/Test.svelte';
 </script>
 
-<Test/>
+<!-- <Test/> -->
 <!-- <BarChart/> -->
 <Histogram/>

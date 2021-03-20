@@ -26,13 +26,14 @@ class Amendements {
           '$replaceRoot': {
             'newRoot': '$dp'
           }
-        }, {
-          '$match': {
-            'count': {
-              '$gte': 10
-            }
-          }
-        }
+        }, 
+        // {
+        //   '$match': {
+        //     'count': {
+        //       '$gte': 10
+        //     }
+        //   }
+        // }
       ]
     ).toArray();
   }
