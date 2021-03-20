@@ -1,6 +1,17 @@
 <script>
 	import { onMount } from 'svelte';
-	import { select, range, scaleLinear, max, scaleBand, axisBottom, axisLeft, stack as d3Stack, stackOrderNone, stackOffsetNone } from 'd3';
+	import {
+    select as d3Select,
+    range,
+    scaleLinear,
+    max,
+    scaleBand,
+    axisBottom,
+    axisLeft,
+    stack as d3Stack,
+    stackOrderNone,
+    stackOffsetNone
+  } from 'd3';
   import { send } from '../query.util'
 
   const width = 500;
@@ -14,10 +25,34 @@
   const legendCellSize = 20
   const tooltipWidth = 210;
 
-	onMount(async () => {
-    let data = await send('http://localhost:3456/api/projectAuteurSort')
-    const keys = [...new Set(data.reduce((acc, d) => [...acc, ...Object.keys(d)], []))];
-    keys.splice(keys.findIndex(k => k === 'auteur'), 1)
+  let documentId
+  let ref = {}
+
+	onMount(() => {
+    drawGraph()
+    loadDocuments()
+  })
+
+  async function loadDocuments() {
+    ref.documents = await send('http://localhost:3456/api/documents')
+  }
+
+  async function drawGraph(documentId) {
+    let data = await send('http://localhost:3456/api/projectAuteurSort', documentId)
+    // const keys = [...new Set(data.reduce((acc, d) => [...acc, ...Object.keys(d)], []))];
+    // keys.splice(keys.findIndex(k => k === 'auteur'), 1).sort()
+    const keys = [
+      "Irrecevable 40",
+      "A discuter",
+      "Rejeté",
+      "En traitement",
+      "En recevabilité",
+      "Retiré",
+      "Irrecevable",
+      "Adopté",
+      "Non soutenu",
+      "Tombé"
+    ]
 
     const heightContent = data.length * 10
     // let data = [
@@ -27,10 +62,10 @@
     // ]
     // const keys = ["d", "e", "f"]
 
-    console.log('keys')
-    console.log(keys)
-    console.log('data')
-    console.log(data)
+    // console.log('keys')
+    // console.log(keys)
+    // console.log('data')
+    // console.log(data)
     const colors = ["#f7fcf0", "#e0f3db", "#ccebc5", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe", "#0868ac", "#084081", "#002000"]
 
 
@@ -40,11 +75,11 @@
         .offset(stackOffsetNone);
 
     var series = stack(data);
-    console.log('series')
-    console.log(series)
+    // console.log('series')
+    // console.log(series)
     
-    console.log('max')
-    console.log(max(series[series.length - 1], d => d[1] || d[0]))
+    // console.log('max')
+    // console.log(max(series[series.length - 1], d => d[1] || d[0]))
 
     const x = scaleLinear()
 			.domain([0, max(series[series.length - 1], d => d[1] || d[0])])
@@ -56,7 +91,7 @@
       .padding(0.1)
 
     // chart
-    const svg = select("#chart")
+    const svg = d3Select("#chart")
     .append('div')
 			.attr("style", `height: ${height}px;` +
                      `overflow-y: auto;`)
@@ -93,7 +128,7 @@
       .attr("dy", ".15em")
 
       // axis bottom
-    select("#chart")
+    d3Select("#chart")
       .append('div')
       .append('svg')
 			.attr("width", width + padding.left)
@@ -106,7 +141,7 @@
       .call(axisBottom(x).ticks(6));
 
       addLegend(keys, colors)
-  })
+  }
 
   function addLegend(keys, colors) {
     let reverseColors = colors.reverse(); // Pour présenter les catégories dans le même sens qu'elles sont utilisées
@@ -114,7 +149,7 @@
 
     const legendHeight = colors.length * legendCellSize
 
-    let legend = select('#chart')
+    let legend = d3Select('#chart')
       .append('svg')
       .attr('style', `position: absolute;` +
                       `top: ${height - legendHeight}px;` +
@@ -146,6 +181,22 @@
             .text(d => d);
   }
 
+  function onDocumentChange() {
+    d3Select("#chart").html("")
+    drawGraph({documentId})
+  }
 </script>
 
+<!-- svelte-ignore a11y-no-onchange -->
+<select
+  bind:value={documentId}
+  on:change={onDocumentChange}
+>
+  <option value={''} />
+  {#if ref.documents}
+    {#each ref.documents as refDocument}
+      <option value={refDocument.uid}>{refDocument.titre}</option>
+    {/each}
+  {/if}
+</select>
 <div id="chart"></div>

@@ -1,10 +1,10 @@
 const express = require("express");
 const Amendements = require('./amendements');
+const Documents = require('./documents');
 
 var router = express.Router();
 
 router.post('/', async function (req, res, next) {
-  console.log(req.body)
   res.send({data: await Amendements.get(req.body._id)});
 });
 
@@ -13,7 +13,11 @@ router.post('/agg', async function (req, res, next) {
 });
 
 router.post('/projectAuteurSort', async function (req, res, next) {
-  res.send(await Amendements.projectAuteurSort());
+  res.send(await Amendements.projectAuteurSort(req.body.documentId));
+});
+
+router.post('/documents', async function (req, res, next) {
+  res.send(await Documents.get());
 });
 
 module.exports = router
