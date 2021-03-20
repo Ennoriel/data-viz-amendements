@@ -1,9 +1,10 @@
 <script>
 	import { onMount } from 'svelte';
-	import { scaleLinear, max, scaleBand, range, selectAll} from 'd3';
-	const data = [3, 6, 8, 5, 900];
+	import { scaleLinear, max, scaleBand, range, select, axisBottom} from 'd3';
+	const data = [3, 6, 8, 5, 9];
 	const width = 200
 	const height = 200
+	const padding = 30
 
 	onMount(() => {
 		const x = scaleLinear()
@@ -14,17 +15,24 @@
 			.domain(range(data.length))
 			.range([0, height])
 
-		const svg = selectAll("svg")
-			.attr("width", width)
-      .attr("height", y.range()[1])
+		const svg = select("svg")
+			.attr("width", width + 2 * padding)
+      .attr("height", y.range()[1] + 2 * padding)
       .attr("font-family", "sans-serif")
       .attr("font-size", "14")
-      .attr("text-anchor", "end");
+      .attr("text-anchor", "end")
+			.append('g')
+			
+    	.attr("transform", "translate(" + padding + "," + padding + ")");
 
 			const bar = svg.selectAll('g')
 				.data(data)
 				.join("g")
 					.attr("transform", (d, i) => `translate(0,${y(i)})`);
+
+			svg.append("g")
+				.attr("transform", "translate(0," + height + ")")
+        .call(axisBottom(x).ticks(6));
 
 			bar.append("rect")
 				.attr("fill", "steelblue")
