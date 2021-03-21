@@ -22,9 +22,9 @@
     bottom: 25,
     left: 125
   }
-  const width = Math.max(Math.min(window.innerWidth, 750), 500) - margin.left - margin.right - 50
+  const width = Math.max(Math.min(window.innerWidth, 750), 300) - margin.left - margin.right - 10
 
-  const legendCellSize = 20
+  const legendCellSize = width > 500 ? 20 : 15
 
   $: drawGraph(documentId)
 
@@ -44,7 +44,7 @@
       "Tombé"
     ]
 
-    const heightContent = data.length * 10
+    const heightContent = data.length * 14
     // let data = [
     //   { auteur: "A", d: 3, e: 4, f: 5 },
     //   { auteur: "B", d: 3, e: 14, f: 5 },
@@ -69,7 +69,7 @@
 		const y = scaleBand()
       .domain(data.map(d => d.auteur))
 			.range([0, heightContent])
-      .padding(0.1)
+      .padding(0.15)
 
     // chart
     const svg = d3Select("#chart").html("")
@@ -107,6 +107,7 @@
     svg.append("g")
       .call(axisLeft(y).tickSize(0))
       .selectAll("text")	
+      .attr('class', 'axis')
       .style("text-anchor", "end")
       .attr("dx", "-.8em")
       .attr("dy", ".15em")
@@ -132,30 +133,25 @@
     let legend = d3Select('#chart')
       .append('svg')
       .attr('style', `position: absolute;` +
-                      `bottom: 50px;` +
-                      `left: ${width - 50}px;` +
+                      `bottom: 40px;` +
+                      `right: 10px;` +
                       `height: ${legendHeight}px;` +
-                      `width: 150px;`)
-      .append('g')
-        // .attr('transform', 'translate(10, 20)'); // Représente le point précis en haut à gauche du premier carré de couleur
+                      `width: 125px;`)
         
-    // Pour chaque couleur, on ajoute un carré toujours positionné au même endroit sur l'axe X et décalé en fonction de la 
-    // taille du carré et de l'indice de la couleur traitée sur l'axe Y
     legend.selectAll()
         .data(reverseColors)
         .enter().append('rect')
             .attr('height', legendCellSize + 'px')
             .attr('width', legendCellSize + 'px')
-            .attr('x', 5)
+            .attr('x', 0)
             .attr('y', (d,i) => i * legendCellSize)
             .style("fill", d => d);
     
-    // On procéde de la même façon sur les libellés avec un positionement sur l'axe X de la taille des carrés 
-    // à laquelle on rajoute 10 px de marge
     legend.selectAll()
         .data(reverseKeys)
         .enter().append('text')
-            .attr("transform", (d,i) => "translate(" + (legendCellSize + 10) + ", " + (i * legendCellSize) + ")")
+            .attr('class', 'legend')
+            .attr("transform", (d,i) => "translate(" + (legendCellSize + 5) + ", " + (i * legendCellSize) + ")")
             .attr("dy", legendCellSize / 1.6) // Pour centrer le texte par rapport aux carrés
             .style("font-size", "13px")
             .style("fill", "grey")
@@ -166,6 +162,10 @@
 <style>
   #chart {
     position: relative;
+  }
+  :global(.legend), :global(.axis) {
+    fill: #333;
+    font-variant: small-caps;
   }
 </style>
 

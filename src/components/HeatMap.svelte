@@ -23,9 +23,12 @@
   const months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
   const days = range(31).map(v => v + 1)
 
-  const width = Math.max(Math.min(window.innerWidth, 750), 500) - margin.left - margin.right - 50
-  const gridSize = Math.floor(width / days.length)
-  const height = gridSize * months.length
+  const width = Math.max(Math.min(window.innerWidth, 750), 300) - margin.left - margin.right - 10
+  const gridSize = {
+    x: Math.floor(width / days.length),
+    y: Math.max(15, Math.floor(width / days.length))
+  }
+  const height = gridSize.y * months.length
 
   let numStops = 3;
   
@@ -73,7 +76,7 @@
   }
 
   function drawYear(year, values) {
-    chart = drawSvgWrapper()
+    let chart = drawSvgWrapper()
     drawSubtitle(chart, year, values)
 
     drawMonthGraph(chart, values)
@@ -103,10 +106,10 @@
     chart.selectAll(".hour")
       .data(values)
       .enter().append("rect")
-        .attr("x", d => ( d.day - 1 ) * gridSize)
-        .attr("y", d => ( d.month - 1 ) * gridSize)
-        .attr("width", gridSize)
-        .attr("height", gridSize)
+        .attr("x", d => ( d.day - 1 ) * gridSize.x)
+        .attr("y", d => ( d.month - 1 ) * gridSize.y)
+        .attr("width", gridSize.x)
+        .attr("height", gridSize.y)
         .style("stroke", "white")
         .style("stroke-opacity", 0.6)
         .style("fill", function(d) { return colorScale(d.count); });
@@ -118,18 +121,19 @@
       .enter().append("text")
         .text(function (d) { return d; })
         .attr("x", 0)
-        .attr("y", (d, i) => i * gridSize)
+        .attr("y", (d, i) => i * gridSize.y)
         .attr("transform", "translate(-6, 12)")
         .attr("class", "month-label")
         .style("text-anchor", "end");
 
+    let daysAxis = width > 450 ? days : days.map((d, i) => i % 2 ? '' : d)
     chart.selectAll(".day-label")
-      .data(days)
+      .data(daysAxis)
       .enter().append("text")
         .text(d => d)
-        .attr("x", (d, i) => i * gridSize)
+        .attr("x", (d, i) => i * gridSize.x)
         .attr("y", 0)
-        .attr("transform", "translate(" + gridSize / 2 + ", -6)")
+        .attr("transform", "translate(" + gridSize.x / 2 + ", -6)")
         .attr("class", "day-label")
         .style("text-anchor", "middle");
   }
@@ -141,7 +145,7 @@
       .attr("width", width + margin.left + margin.right)
       .attr("height", 100)
       .append("g")
-        .attr("transform", "translate(" + margin.left + ", 50)");
+        .attr("transform", "translate(" + (margin.left - margin.right) / 2 + ", 50)");
 
     chart.append("defs")
     .append("linearGradient")
@@ -197,7 +201,7 @@
 
 <style>
   :global(.subtitle), :global(.month-label), :global(.day-label) {
-    fill: #444;
+    fill: #333;
     font-size: .8em;
     font-variant: small-caps;
   }
