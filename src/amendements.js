@@ -113,7 +113,7 @@ class Amendements {
     ])
 
     let res = await MongoUtil.db.collection('amendements').aggregate(query).toArray();
-    return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.nom} ${test.prenom}` || auteur, ...statuts}))
+    return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.prenom} ${test.nom}` || auteur, ...statuts}))
   }
 
   async projectDayMonth(documentId) {

@@ -15,20 +15,21 @@
 
   export let documentId
 
-  const width = 500;
   const height = 450;
-  const padding = {
+  const margin = {
     top: 5,
-    right: 25,
+    right: 0,
     bottom: 25,
     left: 125
   }
+  const width = Math.max(Math.min(window.innerWidth, 750), 500) - margin.left - margin.right - 50
+
   const legendCellSize = 20
 
   $: drawGraph(documentId)
 
   async function drawGraph(id) {
-    let data = await send('http://localhost:3456/api/projectAuteurSort', {documentId: id})
+    let data = await send('/api/projectAuteurSort', {documentId: id})
     
     const keys = [
       "Irrecevable 40",
@@ -63,7 +64,7 @@
 
     const x = scaleLinear()
 			.domain([0, max(series[series.length - 1], d => d[1] || d[0])])
-			.range([0, width])
+			.range([0, width - 10])
 
 		const y = scaleBand()
       .domain(data.map(d => d.auteur))
@@ -72,15 +73,18 @@
 
     // chart
     const svg = d3Select("#chart").html("")
-    .append('div')
+			.attr("style", `width: ${width + margin.left}px;`)
+      .append('div')
 			.attr("style", `height: ${height}px;` +
-                     `overflow-y: auto;`)
+                     `width: ${width + margin.left}px;` +
+                     `overflow-y: auto;` +
+                     `overflow-x: hidden;`)
     .append("svg")
       .attr("id", "svg")
-      .attr("width", width + padding.left)
-      .attr("height", heightContent + padding.top)
+      .attr("width", width + margin.left)
+      .attr("height", heightContent + margin.top)
       .append("g")
-    	.attr("transform", `translate(${padding.left}, ${padding.top})`);
+    	.attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     let groups = svg
     .selectAll("g")
@@ -111,13 +115,13 @@
     d3Select("#chart")
       .append('div')
       .append('svg')
-			.attr("width", width + padding.left)
-      .attr("height", padding.bottom)
+			.attr("width", width + margin.left)
+      .attr("height", margin.bottom)
       .attr("font-family", "sans-serif")
       .attr("font-size", "14")
       .attr("text-anchor", "end")
       .append("g")
-      .attr("transform", "translate(" + padding.left + ", 0)")
+      .attr("transform", "translate(" + margin.left + ", 0)")
       .call(axisBottom(x).ticks(6));
 
     let reverseColors = colors.reverse(); // Pour présenter les catégories dans le même sens qu'elles sont utilisées
@@ -130,7 +134,8 @@
       .attr('style', `position: absolute;` +
                       `bottom: 50px;` +
                       `left: ${width - 50}px;` +
-                      `height: ${legendHeight}px`)
+                      `height: ${legendHeight}px;` +
+                      `width: 150px;`)
       .append('g')
         // .attr('transform', 'translate(10, 20)'); // Représente le point précis en haut à gauche du premier carré de couleur
         
@@ -161,9 +166,8 @@
 <style>
   #chart {
     position: relative;
-    width: 650px;
   }
 </style>
 
-<h1>Nombre d'amendements par député</h1>
+<h2>Nombre d'amendements par député</h2>
 <div id="chart"></div>

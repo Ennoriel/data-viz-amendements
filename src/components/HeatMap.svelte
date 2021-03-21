@@ -15,15 +15,15 @@
 
   const margin = {
     top: 50,
-    right: 25,
+    right: 0,
     bottom: 10,
-    left: 100
+    left: 75
   }
 
   const months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
   const days = range(31).map(v => v + 1)
 
-  const width = Math.max(Math.min(window.innerWidth, 750), 500) - margin.left - margin.right - 10  
+  const width = Math.max(Math.min(window.innerWidth, 750), 500) - margin.left - margin.right - 50
   const gridSize = Math.floor(width / days.length)
   const height = gridSize * months.length
 
@@ -36,13 +36,13 @@
   $: drawGraph(documentId)
 
   async function drawGraph(id) {
-    let data = await send('http://localhost:3456/api/projectDayMonth', { year: 2020, documentId: id })
+    let data = await send('/api/projectDayMonth', { year: 2020, documentId: id })
 
     data = data.filter(val => !!val._id)
               .map(val => ({year: val._id, data: val.data}))
               .sort((val1, val2) => val1.year - val2.year)
 
-    d3Select('#heat-map').html("")
+    d3Select('#heat-map').html("").attr('style', `width: ${width + margin.left + margin.right}px;`)
 
     initColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
 
@@ -180,7 +180,7 @@
       .attr("x", 0)
       .attr("y", -10)
       .style("text-anchor", "middle")
-      .text("Nombre d'Articles");
+      .text("Nombre d'Amendements");
 
     // scale pour x-axis
     let xScale = scaleLog()
@@ -196,9 +196,6 @@
 </script>
 
 <style>
-  #heat-map {
-    width: 775px;
-  }
   :global(.subtitle), :global(.month-label), :global(.day-label) {
     fill: #444;
     font-size: .8em;
@@ -209,5 +206,5 @@
   }
 </style>
 
-<h1>Nombre d'amendements par jour</h1>
+<h2>Nombre d'amendements par jour</h2>
 <div id="heat-map"></div>

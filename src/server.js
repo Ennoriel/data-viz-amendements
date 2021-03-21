@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 const assets = sirv(`${__dirname}/../public`, {
-  maxAge: 31536000,
+  maxAge: 3600,
   immutable: true
 });
 app.use(compress, assets)

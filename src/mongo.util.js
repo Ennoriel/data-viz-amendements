@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 
 class MongoUtil {
   constructor() {
-    this.client = new MongoClient(process.env.MONGO_URI, { useUnifiedTopology: true });
+    this.client = new MongoClient(process.env.MONGO_URI, { useUnifiedTopology: true, authSource: process.env.MONGO_DB });
   }
   async init() {
     await this.client.connect();

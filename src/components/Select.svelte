@@ -9,7 +9,7 @@
   onMount(loadDocuments)
 
   async function loadDocuments() {
-    ref.documents = await send('http://localhost:3456/api/documents')
+    ref.documents = await send('/api/documents')
   }
 </script>
 
@@ -19,7 +19,7 @@
   }
 </style>
 
-<h1>Filtrer par projet de loi</h1>
+<h2>Filtrer par projet de loi</h2>
 <!-- svelte-ignore a11y-no-onchange -->
 <select
   bind:value={documentId}

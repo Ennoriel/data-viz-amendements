@@ -10,7 +10,7 @@ export async function send(path, data) {
     opts.body=JSON.stringify(data);
   }
 
-  return fetch(path, opts)
+  return fetch(`${process.env.APP_API}${path}`, opts)
     .then(response => response.text())
     .then(json => {
       try {
