@@ -116,7 +116,7 @@ class Amendements {
     return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.nom} ${test.prenom}` || auteur, ...statuts}))
   }
 
-  async projectDayMonth(year, documentId) {
+  async projectDayMonth(documentId) {
     
     let query = []
 
@@ -132,9 +132,9 @@ class Amendements {
       {
         '$group': {
           '_id': {
-            'day': {  '$dayOfMonth': '$dateDepot' }, 
-            'month': { '$month': '$dateDepot' },
-            'year': '$yearDepot'
+            'day': '$depot.day', 
+            'month': '$depot.month', 
+            'year': '$depot.year'
           }, 
           'count': {
             '$sum': 1
