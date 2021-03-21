@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import {
     select as d3Select,
-    range,
     scaleLinear,
     max,
     scaleBand,
@@ -14,33 +13,23 @@
   } from 'd3';
   import { send } from '../query.util'
 
+  export let documentId
+
   const width = 500;
-  const height = 500;
+  const height = 450;
   const padding = {
-    top: 25,
+    top: 5,
     right: 25,
     bottom: 25,
-    left: 100
+    left: 125
   }
   const legendCellSize = 20
-  const tooltipWidth = 210;
 
-  let documentId
-  let ref = {}
+  $: drawGraph(documentId)
 
-	onMount(() => {
-    drawGraph()
-    loadDocuments()
-  })
-
-  async function loadDocuments() {
-    ref.documents = await send('http://localhost:3456/api/documents')
-  }
-
-  async function drawGraph(documentId) {
-    let data = await send('http://localhost:3456/api/projectAuteurSort', documentId)
-    // const keys = [...new Set(data.reduce((acc, d) => [...acc, ...Object.keys(d)], []))];
-    // keys.splice(keys.findIndex(k => k === 'auteur'), 1).sort()
+  async function drawGraph(id) {
+    let data = await send('http://localhost:3456/api/projectAuteurSort', {documentId: id})
+    
     const keys = [
       "Irrecevable 40",
       "A discuter",
@@ -62,10 +51,6 @@
     // ]
     // const keys = ["d", "e", "f"]
 
-    // console.log('keys')
-    // console.log(keys)
-    // console.log('data')
-    // console.log(data)
     const colors = ["#f7fcf0", "#e0f3db", "#ccebc5", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe", "#0868ac", "#084081", "#002000"]
 
 
@@ -75,11 +60,6 @@
         .offset(stackOffsetNone);
 
     var series = stack(data);
-    // console.log('series')
-    // console.log(series)
-    
-    // console.log('max')
-    // console.log(max(series[series.length - 1], d => d[1] || d[0]))
 
     const x = scaleLinear()
 			.domain([0, max(series[series.length - 1], d => d[1] || d[0])])
@@ -91,16 +71,16 @@
       .padding(0.1)
 
     // chart
-    const svg = d3Select("#chart")
+    const svg = d3Select("#chart").html("")
     .append('div')
 			.attr("style", `height: ${height}px;` +
                      `overflow-y: auto;`)
     .append("svg")
       .attr("id", "svg")
-      .attr("width", width+ padding.left)
-      .attr("height", heightContent)
+      .attr("width", width + padding.left)
+      .attr("height", heightContent + padding.top)
       .append("g")
-    	.attr("transform", "translate(" + padding.left + ", 0)");
+    	.attr("transform", `translate(${padding.left}, ${padding.top})`);
 
     let groups = svg
     .selectAll("g")
@@ -140,10 +120,6 @@
       .attr("transform", "translate(" + padding.left + ", 0)")
       .call(axisBottom(x).ticks(6));
 
-      addLegend(keys, colors)
-  }
-
-  function addLegend(keys, colors) {
     let reverseColors = colors.reverse(); // Pour présenter les catégories dans le même sens qu'elles sont utilisées
     let reverseKeys = keys.reverse();
 
@@ -152,7 +128,7 @@
     let legend = d3Select('#chart')
       .append('svg')
       .attr('style', `position: absolute;` +
-                      `top: ${height - legendHeight}px;` +
+                      `bottom: 50px;` +
                       `left: ${width - 50}px;` +
                       `height: ${legendHeight}px`)
       .append('g')
@@ -180,23 +156,14 @@
             .style("fill", "grey")
             .text(d => d);
   }
-
-  function onDocumentChange() {
-    d3Select("#chart").html("")
-    drawGraph({documentId})
-  }
 </script>
 
-<!-- svelte-ignore a11y-no-onchange -->
-<select
-  bind:value={documentId}
-  on:change={onDocumentChange}
->
-  <option value={''} />
-  {#if ref.documents}
-    {#each ref.documents as refDocument}
-      <option value={refDocument.uid}>{refDocument.titre}</option>
-    {/each}
-  {/if}
-</select>
+<style>
+  #chart {
+    position: relative;
+    width: 650px;
+  }
+</style>
+
+<h1>Nombre d'amendements par député</h1>
 <div id="chart"></div>

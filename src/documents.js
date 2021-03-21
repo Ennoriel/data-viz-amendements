@@ -5,10 +5,11 @@ class Documents {
   async get() {
     return await MongoUtil.db.collection('amendements').aggregate(
       [
-        { '$facet': { 'doc': [ { '$sortByCount': '$texteLegislatifRef' } ] }},
-        { '$unwind': { 'path': '$doc' }},
+        { '$facet': { 'stats': [ { '$sortByCount': '$texteLegislatifRef' } ] }},
+        { '$unwind': { 'path': '$stats' }},
         { '$limit': 100},
-        { '$lookup': { 'from': 'documents', 'localField': 'doc._id', 'foreignField': 'uid', 'as': 'doc' }},
+        { '$lookup': { 'from': 'documents', 'localField': 'stats._id', 'foreignField': 'uid', 'as': 'doc' }},
+        { '$addFields': { 'doc.count': '$stats.count' }},
         { '$unwind': { 'path': '$doc' }},
         { '$replaceRoot': { 'newRoot': '$doc' }}
       ]

@@ -26,14 +26,7 @@ class Amendements {
           '$replaceRoot': {
             'newRoot': '$dp'
           }
-        }, 
-        // {
-        //   '$match': {
-        //     'count': {
-        //       '$gte': 10
-        //     }
-        //   }
-        // }
+        },
       ]
     ).toArray();
   }
@@ -121,6 +114,48 @@ class Amendements {
 
     let res = await MongoUtil.db.collection('amendements').aggregate(query).toArray();
     return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.nom} ${test.prenom}` || auteur, ...statuts}))
+  }
+
+  async projectDayMonth(year, documentId) {
+    
+    let query = []
+
+    if (documentId) {
+      query.push({
+        $match: {
+          texteLegislatifRef: documentId
+        }
+      })
+    }
+
+    query.push(...[
+      {
+        '$group': {
+          '_id': {
+            'day': {  '$dayOfMonth': '$dateDepot' }, 
+            'month': { '$month': '$dateDepot' },
+            'year': '$yearDepot'
+          }, 
+          'count': {
+            '$sum': 1
+          }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.year",
+          data: {
+            "$push": {
+              month: "$_id.month",
+              day: "$_id.day",
+              count: "$count"
+            }
+          }
+        }
+      }
+    ])
+
+    return await MongoUtil.db.collection('amendements').aggregate(query).toArray();
   }
 }
 module.exports = new Amendements();

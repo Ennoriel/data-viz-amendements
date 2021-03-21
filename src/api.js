@@ -16,6 +16,10 @@ router.post('/projectAuteurSort', async function (req, res, next) {
   res.send(await Amendements.projectAuteurSort(req.body.documentId));
 });
 
+router.post('/projectDayMonth', async function (req, res, next) {
+  res.send(await Amendements.projectDayMonth(req.body.year, req.body.documentId));
+});
+
 router.post('/documents', async function (req, res, next) {
   res.send(await Documents.get());
 });
