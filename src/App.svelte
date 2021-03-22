@@ -4,10 +4,7 @@
 	import HeatMap from './components/HeatMap.svelte'
 
 	let documentId
-
-	function onDocumentChange(value) {
-		documentId = value
-	}
+	let acteurId
 </script>
 
 <style>
@@ -25,8 +22,8 @@
 	<p>
 		La base de données est composée de 500 000 amendements et 6500 projets/propositions de loi au 18 mars 2021.
 	</p>
-	<Select {onDocumentChange}/>
+	<Select bind:documentId bind:acteurId/>
 </header>
 
-<HistogramStacked {documentId}/>
-<HeatMap {documentId}/>
+<HistogramStacked {documentId} {acteurId}/>
+<HeatMap {documentId} {acteurId}/>

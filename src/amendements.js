@@ -116,19 +116,18 @@ class Amendements {
     return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.prenom} ${test.nom}` || auteur, ...statuts}))
   }
 
-  async projectDayMonth(documentId) {
+  async projectDayMonth(documentId, acteurId) {
     
     let query = []
+    let match = {}
 
-    if (documentId) {
-      query.push({
-        $match: {
-          texteLegislatifRef: documentId
-        }
-      })
-    }
+    if (documentId) match.texteLegislatifRef = documentId
+    if (acteurId) match.auteur = acteurId
 
     query.push(...[
+      {
+        '$match': match
+      },
       {
         '$group': {
           '_id': {

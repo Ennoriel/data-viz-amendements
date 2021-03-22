@@ -12,6 +12,7 @@
   import { send } from '../query.util'
 
   export let documentId
+  export let acteurId
 
   const margin = {
     top: 50,
@@ -28,7 +29,13 @@
     x: Math.floor(width / days.length),
     y: Math.max(15, Math.floor(width / days.length))
   }
-  const height = gridSize.y * months.length
+
+  let data = []
+
+  let monthsToDraw
+  let minMonth
+  let maxMonth
+  let height
 
   let numStops = 3;
   
@@ -36,10 +43,10 @@
   let countScale
   let countPoint
 
-  $: drawGraph(documentId)
+  $: drawGraph(documentId, acteurId)
 
-  async function drawGraph(id) {
-    let data = await send('/api/projectDayMonth', { year: 2020, documentId: id })
+  async function drawGraph(documentId, acteurId) {
+    data = await send('/api/projectDayMonth', { year: 2020, documentId, acteurId })
 
     data = data.filter(val => !!val._id)
               .map(val => ({year: val._id, data: val.data}))
@@ -47,13 +54,11 @@
 
     d3Select('#heat-map').html("").attr('style', `width: ${width + margin.left + margin.right}px;`)
 
-    initColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
-
-    data.forEach(v => drawYear(v.year, v.data))
-
-    drawColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
-
-
+    if (data.length) {
+      initColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
+      data.forEach(v => drawYear(v.year, v.data))
+      drawColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
+    }
   }
 
   function formatNumber(number) {
@@ -76,6 +81,12 @@
   }
 
   function drawYear(year, values) {
+
+    minMonth = values.reduce((acc, v) => Math.min(acc, v.month), 12)
+    maxMonth = values.reduce((acc, v) => Math.max(acc, v.month), 0)
+    monthsToDraw = months.slice(minMonth - 1, maxMonth)
+    height = gridSize.y * monthsToDraw.length
+
     let chart = drawSvgWrapper()
     drawSubtitle(chart, year, values)
 
@@ -103,11 +114,12 @@
   }
 
   function drawMonthGraph(chart, values) {
+
     chart.selectAll(".hour")
       .data(values)
       .enter().append("rect")
         .attr("x", d => ( d.day - 1 ) * gridSize.x)
-        .attr("y", d => ( d.month - 1 ) * gridSize.y)
+        .attr("y", d => ( d.month - minMonth ) * gridSize.y)
         .attr("width", gridSize.x)
         .attr("height", gridSize.y)
         .style("stroke", "white")
@@ -117,7 +129,7 @@
 
   function drawMonthAxis(chart) {
     chart.selectAll(".month-label")
-      .data(months)
+      .data(monthsToDraw)
       .enter().append("text")
         .text(function (d) { return d; })
         .attr("x", 0)
@@ -193,7 +205,6 @@
 
     // x axis
     legendsvg.append("g") 
-      .attr("class", "axis")
       .attr("transform", "translate(0, 10)")
       .call(axisBottom(xScale).ticks(4, "d"));
   }
@@ -211,4 +222,9 @@
 </style>
 
 <h2>Nombre d'amendements par jour</h2>
-<div id="heat-map"></div>
+
+{#if data.length}
+  <div id="heat-map"></div>
+{:else}
+  <p>Pas d'amendement</p>
+{/if}
