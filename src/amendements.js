@@ -4,11 +4,11 @@ ObjectID = require('mongodb').ObjectID
 class Amendements {
   
   async get(_id) {
-    return await MongoUtil.db.collection('amendements').find({_id: ObjectID(_id)}).toArray();
+    return MongoUtil.db.collection('amendements').find({_id: ObjectID(_id)}).toArray();
   }
 
   async agg() {
-    return await MongoUtil.db.collection('amendements').aggregate(
+    return MongoUtil.db.collection('amendements').aggregate(
       [
         {
           '$facet': {
@@ -94,12 +94,12 @@ class Amendements {
           from: 'acteurs',
           localField: 'auteur',
           foreignField: 'uid',
-          as: 'test'
+          as: 'acteur'
         }
       },
       {
         $unwind: {
-          path: '$test'
+          path: '$acteur'
         }
       },
       {
@@ -112,11 +112,19 @@ class Amendements {
       }
     ])
 
-    let res = await MongoUtil.db.collection('amendements').aggregate(query).toArray();
-    return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.prenom} ${test.nom}` || auteur, ...statuts}))
+    // let res = await MongoUtil.db.collection('amendements').aggregate(query).toArray();
+    // return res.map(({auteur, test, statuts}) => ({auteur: test && `${test.prenom} ${test.nom}` || auteur, ...statuts}))
+
+
+    return MongoUtil.db.collection('amendements')
+                        .aggregate(query)
+                        .toArray()
+                        .then(res => res
+                          .map(({auteur, acteur, statuts}) => ({auteur: acteur && `${acteur.prenom} ${acteur.nom}` || auteur, ...statuts}))
+                        )
   }
 
-  async projectDayMonth(documentId, acteurId) {
+  projectDayMonth(documentId, acteurId) {
     
     let query = []
     let match = {}
@@ -154,7 +162,130 @@ class Amendements {
       }
     ])
 
-    return await MongoUtil.db.collection('amendements').aggregate(query).toArray();
+    return MongoUtil.db.collection('amendements').aggregate(query).toArray();
+  }
+
+  async projectGroupNewSort(documentId) {
+    let query = []
+    let match = {}
+
+    if (documentId) match.texteLegislatifRef = documentId
+
+    query.push(
+      ...[
+        {
+          '$match': match
+        },
+        {
+          '$group': {
+            '_id': {
+              'sort': '$sort', 
+              'groupe': '$groupe'
+            }, 
+            'count': {
+              '$sum': '$count'
+            }
+          }
+        }, {
+          '$group': {
+            '_id': '$_id.groupe', 
+            'agg': {
+              '$push': {
+                'k': '$_id.sort', 
+                'v': '$count'
+              }
+            }, 
+            'count': {
+              '$sum': '$count'
+            }
+          }
+        }, {
+          '$project': {
+            '_id': 0, 
+            'groupe': '$_id', 
+            'res': {
+              '$arrayToObject': '$agg'
+            }, 
+            'count': 1
+          }
+        }, {
+          '$sort': {
+            'count': -1
+          }
+        }
+      ]
+    )
+
+    return MongoUtil.db.collection('amend-group-newSort')
+        .aggregate(query)
+        .toArray()
+        .then(res => res
+          .map(({groupe, res, count}) => ({groupe, ...res}))
+        )
+  }
+
+  async sankyActeurDocumentSort(documentIds, acteurIds) {
+    let query = []
+    let match = {}
+
+    if (documentIds) match.texteLegislatifRef = {$in: documentIds}
+    if (acteurIds) match.auteur = {$in: acteurIds}
+
+    query.push(...[
+      {
+        $match: match
+      },
+      {
+        $lookup: {
+          from: 'acteurs',
+          localField: 'auteur',
+          foreignField: 'uid',
+          as: 'auteurObj'
+        }
+      },
+      {
+        $unwind: {
+          path: "$auteurObj"
+        }
+      },
+      {
+        $facet: {
+          t: [ 
+            {
+              $group: {
+                _id: {
+                  texteLegislatifRef: "$texteLegislatifRef",
+                  auteur: { $concat: ["$auteurObj.nom", " ", "$auteurObj.prenom"]}
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          u: [
+            {
+              $group: {
+                _id: {
+                  texteLegislatifRef: "$texteLegislatifRef",
+                  sort: "$sort"
+                },
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ])
+
+    let res = await MongoUtil.db.collection('amendements').aggregate(query).toArray()
+
+    if (res.length) {
+      return [
+        ...res[0].t.map(val => ({source: val._id.auteur,             target: val._id.texteLegislatifRef, value: val.count})),
+        ...res[0].u.map(val => ({source: val._id.texteLegislatifRef, target: val._id.sort,               value: val.count})),
+      ]
+    } else {
+      return []
+    }
   }
 }
 module.exports = new Amendements();

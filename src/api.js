@@ -17,8 +17,16 @@ router.post('/projectAuteurSort', async function (req, res, next) {
   res.send(await Amendements.projectAuteurSort(req.body.documentId));
 });
 
+router.post('/projectGroupNewSort', async function (req, res, next) {
+  res.send(await Amendements.projectGroupNewSort(req.body.documentId));
+});
+
 router.post('/projectDayMonth', async function (req, res, next) {
   res.send(await Amendements.projectDayMonth(req.body.documentId, req.body.acteurId));
+});
+
+router.post('/sankyActeurDocumentSort', async function (req, res, next) {
+  res.send(await Amendements.sankyActeurDocumentSort(req.body.documentIds, req.body.acteurIds));
 });
 
 router.post('/documents', async function (req, res, next) {

@@ -6,4 +6,3 @@ Données issues des bases de l'[Open Data de l'AN](https://data.assemblee-nation
   - Documents
 
 Permet de filtrer les amendements par texte de loi
- 

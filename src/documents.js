@@ -3,7 +3,7 @@ var MongoUtil = require('./mongo.util');
 class Documents {
   
   async get() {
-    return await MongoUtil.db.collection('amendements').aggregate(
+    return MongoUtil.db.collection('amendements').aggregate(
       [
         { '$facet': { 'stats': [ { '$sortByCount': '$texteLegislatifRef' } ] }},
         { '$unwind': { 'path': '$stats' }},

@@ -1,10 +1,25 @@
 <script>
+	import { onMount } from 'svelte';
+  import { send } from './query.util'
+	
+	import Divider from './components/Divider.svelte'
+	import DeputeeSortHS from './components/StackedHistogram/DeputeeSortHS.svelte'
+	import GroupeNewSortHS from './components/StackedHistogram/GroupeNewSortHS.svelte'
 	import Select from './components/Select.svelte'
-	import HistogramStacked from './components/HistogramStacked.svelte';
 	import HeatMap from './components/HeatMap.svelte'
+	import SankeyDiagram from './components/SankeyDiagram.svelte'
+
+	let ref = {}
 
 	let documentId
 	let acteurId
+
+	onMount(loadDocuments)
+
+	async function loadDocuments() {
+		send('/api/documents').then(res => ref.documents = res)
+		send('/api/acteurs').then(res => ref.acteurs = res)
+	}
 </script>
 
 <style>
@@ -22,8 +37,15 @@
 	<p>
 		La base de données est composée de 500 000 amendements et 6500 projets/propositions de loi au 18 mars 2021.
 	</p>
-	<Select bind:documentId bind:acteurId/>
 </header>
 
-<HistogramStacked {documentId} {acteurId}/>
+<Divider/>
+<Select {ref} bind:documentId bind:acteurId/>
+<Divider/>
 <HeatMap {documentId} {acteurId}/>
+<Divider/>
+<DeputeeSortHS {documentId} />
+<Divider/>
+<GroupeNewSortHS {documentId} />
+<Divider/>
+<SankeyDiagram {ref}/>

@@ -1,5 +1,4 @@
 <script>
-	import { onMount } from 'svelte';
 	import {
     select as d3Select,
     range,
@@ -24,7 +23,7 @@
   const months = ['Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre']
   const days = range(31).map(v => v + 1)
 
-  const width = Math.max(Math.min(window.innerWidth, 750), 300) - margin.left - margin.right - 10
+  const width = Math.max(Math.min(window.innerWidth, 600), 300) - margin.left - margin.right - 10
   const gridSize = {
     x: Math.floor(width / days.length),
     y: Math.max(15, Math.floor(width / days.length))
@@ -46,7 +45,8 @@
   $: drawGraph(documentId, acteurId)
 
   async function drawGraph(documentId, acteurId) {
-    data = await send('/api/projectDayMonth', { year: 2020, documentId, acteurId })
+    send('/api/projectDayMonth', { documentId, acteurId }).then(res => {
+      data = res
 
     data = data.filter(val => !!val._id)
               .map(val => ({year: val._id, data: val.data}))
@@ -59,6 +59,7 @@
       data.forEach(v => drawYear(v.year, v.data))
       drawColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
     }
+    })
   }
 
   function formatNumber(number) {
@@ -223,8 +224,7 @@
 
 <h2>Nombre d'amendements par jour</h2>
 
-{#if data.length}
-  <div id="heat-map"></div>
-{:else}
+<div id="heat-map"></div>
+{#if !data.length}
   <p>Pas d'amendement</p>
 {/if}

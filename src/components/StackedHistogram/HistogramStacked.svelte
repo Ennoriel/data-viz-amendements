@@ -11,48 +11,54 @@
     stackOrderNone,
     stackOffsetNone
   } from 'd3';
-  import { send } from '../query.util'
 
-  export let documentId
+  export let data
+  export let getXVal
+  export let title
 
-  const height = 450;
-  const margin = {
+  let height = 450;
+  let margin = {
     top: 5,
     right: 0,
     bottom: 25,
-    left: 125
+    left: 150
   }
   const width = Math.max(Math.min(window.innerWidth, 750), 300) - margin.left - margin.right - 10
+  const randomNumber = Math.floor(Math.random() * 100000000)
 
   const legendCellSize = width > 500 ? 20 : 15
 
-  $: drawGraph(documentId)
+  $: if(data) drawGraph()
 
-  async function drawGraph(id) {
-    let data = await send('/api/projectAuteurSort', {documentId: id})
-    
+  async function drawGraph() {
+
     const keys = [
-      "Irrecevable 40",
-      "A discuter",
-      "Rejeté",
-      "En traitement",
-      "En recevabilité",
-      "Retiré",
-      "Irrecevable",
-      "Adopté",
-      "Non soutenu",
-      "Tombé"
-    ]
+      ...new Set(data.reduce((acc, val) => [...acc, ...Object.keys(val).filter(key => !getXVal({[key]: 42}) && key !== 'count')], []))
+    ].sort()
+
+    margin.left = 6 * data.reduce((acc, val) => Math.max(acc, getXVal(val).length), 0)
 
     const heightContent = data.length * 14
-    // let data = [
-    //   { auteur: "A", d: 3, e: 4, f: 5 },
-    //   { auteur: "B", d: 3, e: 14, f: 5 },
-    //   { auteur: "C", d: 3, e: 24, f: 5 },
-    // ]
-    // const keys = ["d", "e", "f"]
+    height = Math.min(450, heightContent + 10)
 
-    const colors = ["#f7fcf0", "#e0f3db", "#ccebc5", "#a8ddb5", "#7bccc4", "#4eb3d3", "#2b8cbe", "#0868ac", "#084081", "#002000"]
+    let colors
+    
+    if(keys.length === 3) {
+      colors = ["#ccebc5", "#4eb3d3", "#084081"]
+    } else {
+      colors = distributedCopy([
+      "#f7fcf0",
+      "#e0f3db",
+      "#ccebc5",
+      "#a8ddb5",
+      "#7bccc4",
+      "#4eb3d3",
+      "#2b8cbe",
+      "#0868ac",
+      "#084081",
+      "#002000"
+    ], keys.length)
+    }
 
 
     var stack = d3Stack()
@@ -67,13 +73,14 @@
 			.range([0, width - 10])
 
 		const y = scaleBand()
-      .domain(data.map(d => d.auteur))
+      .domain(data.map(getXVal))
 			.range([0, heightContent])
       .padding(0.15)
 
     // chart
-    const svg = d3Select("#chart").html("")
-			.attr("style", `width: ${width + margin.left}px;`)
+    const svg = d3Select(`#chart-${randomNumber}`).html("")
+			.attr("style", `width: ${width + margin.left}px;` +
+                      `position: relative;`)
       .append('div')
 			.attr("style", `height: ${height}px;` +
                      `width: ${width + margin.left}px;` +
@@ -100,7 +107,7 @@
         .append("rect")
         .attr("x", d => x(d[0]))
         .attr("width", d => x(d[1] - d[0]))
-        .attr("y", d => y(d.data.auteur))
+        .attr("y", d => y(getXVal(d.data)))
         .attr("height", d => y.bandwidth());
 
     // axis left
@@ -113,7 +120,7 @@
       .attr("dy", ".15em")
 
       // axis bottom
-    d3Select("#chart")
+    d3Select(`#chart-${randomNumber}`)
       .append('div')
       .append('svg')
 			.attr("width", width + margin.left)
@@ -125,12 +132,12 @@
       .attr("transform", "translate(" + margin.left + ", 0)")
       .call(axisBottom(x).ticks(6));
 
-    let reverseColors = colors.reverse(); // Pour présenter les catégories dans le même sens qu'elles sont utilisées
+    let reverseColors = colors.reverse();
     let reverseKeys = keys.reverse();
 
     const legendHeight = colors.length * legendCellSize
 
-    let legend = d3Select('#chart')
+    let legend = d3Select(`#chart-${randomNumber}`)
       .append('svg')
       .attr('style', `position: absolute;` +
                       `bottom: 40px;` +
@@ -157,17 +164,36 @@
             .style("fill", "grey")
             .text(d => d);
   }
+
+  /**
+   * Retrieve a fixed number of elements from an array, evenly distributed but
+   * always including the first and last elements.
+   *
+   * @param   {Array} items - The array to operate on.
+   * @param   {number} n - The number of elements to extract.
+   * @returns {Array}
+   */
+  function distributedCopy(items, n) {
+      var elements = [items[0]];
+      var totalItems = items.length - 2;
+      var interval = Math.floor(totalItems/(n - 2));
+      for (var i = 1; i < n - 1; i++) {
+          elements.push(items[i * interval]);
+      }
+      elements.push(items[items.length - 1]);
+      return elements;
+  }
 </script>
 
 <style>
-  #chart {
+  /* #chart {
     position: relative;
-  }
+  } */
   :global(.legend), :global(.axis) {
     fill: #333;
     font-variant: small-caps;
   }
 </style>
 
-<h2>Nombre d'amendements par député</h2>
-<div id="chart"></div>
+<h2>{title}</h2>
+<div id={`chart-${randomNumber}`}></div>
