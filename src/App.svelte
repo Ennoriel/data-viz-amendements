@@ -8,6 +8,7 @@
 	import Select from './components/Select.svelte'
 	import HeatMap from './components/HeatMap.svelte'
 	import SankeyDiagram from './components/SankeyDiagram.svelte'
+	import LinearChart from './components/LinearChart.svelte'
 
 	let ref = {}
 
@@ -49,3 +50,5 @@
 <GroupeNewSortHS {documentId} />
 <Divider/>
 <SankeyDiagram {ref}/>
+<Divider/>
+<LinearChart/>
