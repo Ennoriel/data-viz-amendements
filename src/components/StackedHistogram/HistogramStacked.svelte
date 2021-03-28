@@ -14,7 +14,6 @@
 
   export let data
   export let getXVal
-  export let title
 
   let height = 450;
   let margin = {
@@ -28,7 +27,7 @@
 
   const legendCellSize = width > 500 ? 20 : 15
 
-  $: if(data) drawGraph()
+  onMount(drawGraph)
 
   async function drawGraph() {
 
@@ -195,5 +194,4 @@
   }
 </style>
 
-<h2>{title}</h2>
 <div id={`chart-${randomNumber}`}></div>

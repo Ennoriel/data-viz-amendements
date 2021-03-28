@@ -1,4 +1,5 @@
 <script>
+  import Spinner from './Spinner.svelte'
 	import { onMount } from 'svelte';
   import { send } from '../query.util'
   import {
@@ -22,10 +23,15 @@
 
   let rawData = {}
   let sankeyData = {}
+  let working
 
   onMount(loadGraph)
   
   async function loadGraph() {
+    working = true
+
+    const svg = d3Select('#svg-sankey').html("")
+
     rawData.links = await send('/api/sankyActeurDocumentSort', {documentIds, acteurIds})
     rawData.nodes = rawData.links.reduce((acc, link) => {
       acc.push(link.source)
@@ -47,8 +53,7 @@
       links: rawData.links.map(d => Object.assign({}, d))
     });
 
-    const svg = d3Select('#svg-sankey').html("")
-      .style("background", "#fff")
+    svg.style("background", "#fff")
       .attr("width", width)
       .attr("height", height);
 
@@ -92,15 +97,21 @@
       .append("tspan")
         .attr("fill-opacity", 0.7)
         .text(d => ` - ${d.value.toLocaleString()}`);
+
+    working = false
   }
 
 </script>
 
-<h2>Diagramme de Sankey - Député, projet de loi, sort de l'ammendement</h2>
+<style>
+  select {
+    padding-bottom: 10em;
+  }
+</style>
+
 <h3>Filtrer par projet de loi (multiselection)</h3>
 <!-- svelte-ignore a11y-no-onchange -->
 <select bind:value={documentIds} multiple>
-  <option value={''} />
   {#if ref.documents}
     {#each ref.documents as refDocument}
       <option value={refDocument.uid}>{`${refDocument.count} - ${refDocument.titre}`}</option>
@@ -111,7 +122,6 @@
 <h3>Filtrer par député (multiselection)</h3>
 <!-- svelte-ignore a11y-no-onchange -->
 <select bind:value={acteurIds} multiple>
-  <option value={''} />
   {#if ref.acteurs}
     {#each ref.acteurs as refActeurs}
       <option value={refActeurs.uid}>{`${refActeurs.prenom} ${refActeurs.nom} (${refActeurs.groupe})`}</option>
@@ -120,6 +130,9 @@
 </select>
 
 <button on:click={loadGraph}>Charger</button>
+{#if working}
+  <Spinner/>
+{/if}
 <div>
   <svg id="svg-sankey"/>
 </div>

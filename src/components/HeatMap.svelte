@@ -1,4 +1,7 @@
 <script>
+  import Select from './Select.svelte'
+  import Spinner from './Spinner.svelte'
+
 	import {
     select as d3Select,
     range,
@@ -10,8 +13,10 @@
   } from 'd3';
   import { send } from '../query.util'
 
-  export let documentId
-  export let acteurId
+  export let ref
+  let documentId
+  let acteurId
+  let working
 
   const margin = {
     top: 50,
@@ -45,20 +50,22 @@
   $: drawGraph(documentId, acteurId)
 
   async function drawGraph(documentId, acteurId) {
+    working = true
     send('/api/projectDayMonth', { documentId, acteurId }).then(res => {
       data = res
 
-    data = data.filter(val => !!val._id)
-              .map(val => ({year: val._id, data: val.data}))
-              .sort((val1, val2) => val1.year - val2.year)
+      data = data.filter(val => !!val._id)
+                .map(val => ({year: val._id, data: val.data}))
+                .sort((val1, val2) => val1.year - val2.year)
 
-    d3Select('#heat-map').html("").attr('style', `width: ${width + margin.left + margin.right}px;`)
+      d3Select('#heat-map').html("").attr('style', `width: ${width + margin.left + margin.right}px;`)
 
-    if (data.length) {
-      initColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
-      data.forEach(v => drawYear(v.year, v.data))
-      drawColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
-    }
+      if (data.length) {
+        initColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
+        data.forEach(v => drawYear(v.year, v.data))
+        drawColorScale(data.reduce((acc, val) => [...acc, ...val.data], []))
+      }
+      working = false
     })
   }
 
@@ -222,9 +229,13 @@
   }
 </style>
 
-<h2>Nombre d'amendements par jour</h2>
+<Select {ref} bind:documentId bind:acteurId />
 
 <div id="heat-map"></div>
-{#if !data.length}
-  <p>Pas d'amendement</p>
+{#if working}
+  <Spinner/>
+{:else}
+  {#if !data.length}
+    <p>Pas d'amendement</p>
+  {/if}
 {/if}

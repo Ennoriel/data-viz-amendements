@@ -30,7 +30,8 @@ mongoUtil.init().then(async() => {
                 },
                 'depot.month': {
                     '$exists': 1
-                }
+                },
+                'isDepute': true
             }
         }, {
             // groupe par sort, auteur, date

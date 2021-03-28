@@ -2,53 +2,81 @@
 	import { onMount } from 'svelte';
   import { send } from './query.util'
 	
-	import Divider from './components/Divider.svelte'
+	import Nav from './components/Nav.svelte'
+	import Home from './components/Home.svelte'
 	import DeputeeSortHS from './components/StackedHistogram/DeputeeSortHS.svelte'
 	import GroupeNewSortHS from './components/StackedHistogram/GroupeNewSortHS.svelte'
-	import Select from './components/Select.svelte'
 	import HeatMap from './components/HeatMap.svelte'
 	import SankeyDiagram from './components/SankeyDiagram.svelte'
 	import LinearChart from './components/LinearChart.svelte'
 
+	let selectedRoute
+
 	let ref = {}
 
-	let documentId
-	let acteurId
+	onMount(loadData)
 
-	onMount(loadDocuments)
-
-	async function loadDocuments() {
+	async function loadData() {
 		send('/api/documents').then(res => ref.documents = res)
 		send('/api/acteurs').then(res => ref.acteurs = res)
 	}
+
+	const routes = [
+		{
+			menu: 'Accueil',
+			title: "Accueil",
+			component: Home
+		},
+		{
+			menu: 'par Jour',
+			title: "Nombre d'amendements par jour",
+			component: HeatMap
+		},
+		{
+			menu: 'par député',
+			title: "Nombre d'amendements par député",
+			component: DeputeeSortHS
+		},
+		{
+			menu: 'par député 2',
+			title: "Nombre d'amendements par député",
+			component: SankeyDiagram
+		},
+		{
+			menu: 'par groupe',
+			title: "Nombre d'amendements par groupe",
+			component: GroupeNewSortHS
+		},
+		{
+			menu: 'dans le temps',
+			title: "Nombre d'amendements dans le temps",
+			component: LinearChart
+		}
+	]
 </script>
 
 <style>
-	header {
-		padding: 10px;
+	:global(html) {
+		--nav-height: 60px;
+		--color-main: rgb(255,62,0);
+	}
+	main {
+		height: calc(100vh - var(--nav-height));
+		box-sizing: border-box;
+		
+		overflow-y: auto;
+
+		padding: 1em;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
 	}
 </style>
 
-<header>
-	<h1>Graphiques relatifs aux amendements déposés sous la XVème législature</h1>
-	<p>
-		Les données sont issues des <a href="https://data.assemblee-nationale.fr" target="_blank">Open data de l'Assemblée Nationale</a>.
-		Le code source est disponible sur ce <a href="{process.env.GITHUB_REPO}" target="_blank">repository Github</a>.
-	</p>
-	<p>
-		La base de données est composée de 500 000 amendements et 6500 projets/propositions de loi au 18 mars 2021.
-	</p>
-</header>
+<Nav {routes} bind:selectedRoute/>
 
-<Divider/>
-<Select {ref} bind:documentId bind:acteurId/>
-<Divider/>
-<HeatMap {documentId} {acteurId}/>
-<Divider/>
-<DeputeeSortHS {documentId} />
-<Divider/>
-<GroupeNewSortHS {documentId} />
-<Divider/>
-<SankeyDiagram {ref}/>
-<Divider/>
-<LinearChart/>
+<main>
+	{#if selectedRoute}
+		<svelte:component this={selectedRoute.component} {ref} />
+	{/if}
+</main>

@@ -1,16 +1,27 @@
 <script>
+  import Select from './../Select.svelte'
+  import Spinner from './../Spinner.svelte'
   import HistogramStacked from './HistogramStacked.svelte';
   import { send } from '../../query.util'
 
-  export let documentId
+  export let ref
+
+  let working = false
+  let documentId
   let data
 
   $: {
+    working = true
     send('/api/projectGroupNewSort', { documentId }).then(res => {
       data = res
-      // console.log(data)
+      working = false
     })
   }
 </script>
 
-<HistogramStacked {data} getXVal={v => v.groupe} title="Nombre d'amendements par groupe politique"/>
+<Select {ref} bind:documentId isActeur={false} />
+{#if working}
+  <Spinner/>
+{:else}
+  <HistogramStacked {data} getXVal={v => v.groupe}/>
+{/if}

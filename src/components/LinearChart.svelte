@@ -211,7 +211,6 @@
   }
 </style>
 
-<h2>Evolution du sort des amendements par groupe politique</h2>
 <h3>Filtrer par sort</h3>
 <!-- svelte-ignore a11y-no-onchange -->
 <select bind:value={sort}>

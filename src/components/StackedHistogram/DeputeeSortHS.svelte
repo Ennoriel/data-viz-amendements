@@ -1,15 +1,27 @@
 <script>
+  import Select from './../Select.svelte'
+  import Spinner from './../Spinner.svelte'
   import HistogramStacked from './HistogramStacked.svelte';
   import { send } from '../../query.util'
 
-  export let documentId
+  export let ref
+
+  let working = false
+  let documentId
   let data
 
   $: {
+    working = true
     send('/api/projectAuteurSort', { documentId }).then(res => {
       data = res
+      working = false
     })
   }
 </script>
 
-<HistogramStacked {data} getXVal={v => v.auteur} title="Nombre d'amendements par député"/>
+<Select {ref} bind:documentId isActeur={false} />
+{#if working}
+  <Spinner/>
+{:else}
+  <HistogramStacked {data} getXVal={v => v.auteur}/>
+{/if}

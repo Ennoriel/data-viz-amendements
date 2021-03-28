@@ -1,39 +1,3 @@
-* {
-    scrollbar-width: thin;
-    scroll-behavior: smooth;
-}
-
-html,
-body {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-h1,
-h2,
-h3,
-p {
-    text-align: center;
-}
-
-a {
-    color: rgb(0, 100, 200);
-    text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
-}
-
 input,
 button,
 select,
@@ -53,6 +17,24 @@ option {
     width: 90vw;
 }
 
-select[multiple=""] {
-    padding-bottom: 15em;
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255, 62, 0) white;
+    font-weight: 300;
+}
+
+body,
+input {
+    margin: 0;
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, Segoe UI, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+h1,
+h2,
+h3 {
+    margin: 1em 0;
+    line-height: 1.2;
 }

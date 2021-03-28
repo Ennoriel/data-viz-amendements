@@ -1,29 +1,35 @@
 <script>
   export let ref
+  export let isDocument = true
+  export let isActeur = true
 
   export let documentId
   export let acteurId
 </script>
 
 <h2>Filtres</h2>
-<h3>par projet de loi</h3>
-<!-- svelte-ignore a11y-no-onchange -->
-<select bind:value={documentId}>
-  <option value={''} />
-  {#if ref.documents}
-    {#each ref.documents as refDocument}
-      <option value={refDocument.uid}>{`${refDocument.count} - ${refDocument.titre.substring(0, 130)}${refDocument.titre.length > 130 ? '...' : ''}`}</option>
-    {/each}
-  {/if}
-</select>
+{#if isDocument}
+  <h3>par projet de loi</h3>
+  <!-- svelte-ignore a11y-no-onchange -->
+  <select bind:value={documentId}>
+    <option value={''} />
+    {#if ref.documents}
+      {#each ref.documents as refDocument}
+        <option value={refDocument.uid}>{`${refDocument.count} - ${refDocument.titre.substring(0, 130)}${refDocument.titre.length > 130 ? '...' : ''}`}</option>
+      {/each}
+    {/if}
+  </select>
+{/if}
 
-<h3>par député</h3>
-<!-- svelte-ignore a11y-no-onchange -->
-<select bind:value={acteurId}>
-  <option value={''} />
-  {#if ref.acteurs}
-    {#each ref.acteurs as refActeurs}
-      <option value={refActeurs.uid}>{`${refActeurs.prenom} ${refActeurs.nom} (${refActeurs.groupe})`}</option>
-    {/each}
-  {/if}
-</select>
+{#if isActeur}
+  <h3>par député</h3>
+  <!-- svelte-ignore a11y-no-onchange -->
+  <select bind:value={acteurId}>
+    <option value={''} />
+    {#if ref.acteurs}
+      {#each ref.acteurs as refActeurs}
+        <option value={refActeurs.uid}>{`${refActeurs.prenom} ${refActeurs.nom} (${refActeurs.groupe})`}</option>
+      {/each}
+    {/if}
+  </select>
+{/if}
