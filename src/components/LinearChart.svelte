@@ -92,7 +92,7 @@
     // row = 3 graphs
     svg.selectAll('.row')
       .data(gridData)
-      .join('svg')
+      .join('g')
       .attr('class', 'row')
       .attr("transform", (d, i) => "translate(0," + height * i + ")")
 
