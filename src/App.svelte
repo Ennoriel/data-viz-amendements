@@ -9,6 +9,7 @@
 	import HeatMap from './components/HeatMap.svelte'
 	import SankeyDiagram from './components/SankeyDiagram.svelte'
 	import LinearChart from './components/LinearChart.svelte'
+	import Blogs from './components/Blog/Blogs.svelte'
 	// import TextLoi from './components/TextLoi.svelte'
 
 	let selectedRoute
@@ -52,6 +53,11 @@
 			menu: 'dans le temps',
 			title: "Nombre d'amendements dans le temps",
 			component: LinearChart
+		},
+		{
+			menu: 'Blog',
+			title: "Billets de blog",
+			component: Blogs
 		},
 		// {
 		// 	menu: 'textes (β)',

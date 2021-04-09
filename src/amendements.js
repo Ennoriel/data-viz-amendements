@@ -219,7 +219,6 @@ class Amendements {
     async projectStatutDate(statut) {
         let res = await MongoUtil.db.collection('amend-statut-group-date')
             .findOne({ _id: statut })
-        console.log(res)
         return res
     }
 

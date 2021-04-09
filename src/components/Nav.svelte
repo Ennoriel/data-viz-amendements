@@ -71,7 +71,7 @@
 			z-index: 1;
 		}
 		ul:hover {
-			max-height: calc(6 * var(--nav-height) + 3px)
+			max-height: calc(7 * var(--nav-height) + 3px)
 		}
 		ul:not(:hover):before {
 			content: "Accueil ⯆";
