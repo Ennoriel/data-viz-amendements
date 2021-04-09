@@ -15,7 +15,7 @@
   export let data
   export let getXVal
 
-  let height = 450;
+  let height;
   let margin = {
     top: 5,
     right: 0,
@@ -38,7 +38,7 @@
     margin.left = 6 * data.reduce((acc, val) => Math.max(acc, getXVal(val).length), 0)
 
     const heightContent = data.length * 14
-    height = Math.min(450, heightContent + 10)
+    height = Math.min(400, heightContent + 10)
 
     let colors
     

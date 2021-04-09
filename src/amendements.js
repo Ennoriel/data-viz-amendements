@@ -27,7 +27,7 @@ class Amendements {
         ).toArray();
     }
 
-    async projectAuteurSort(documentId) {
+    async projectAuteurStatut(documentId) {
 
         let query = []
 
@@ -47,7 +47,7 @@ class Amendements {
             {
                 '$group': {
                     '_id': {
-                        'sort': '$sort',
+                        'statut': '$statut',
                         'auteur': '$auteur'
                     },
                     'count': {
@@ -57,7 +57,7 @@ class Amendements {
             }, {
                 '$project': {
                     '_id': 0,
-                    'sort': '$_id.sort',
+                    'statut': '$_id.statut',
                     'auteur': '$_id.auteur',
                     'count': 1
                 }
@@ -66,7 +66,7 @@ class Amendements {
                     '_id': '$auteur',
                     'statuts': {
                         '$push': {
-                            'k': '$sort',
+                            'k': '$statut',
                             'v': '$count'
                         }
                     },
@@ -159,57 +159,56 @@ class Amendements {
         return MongoUtil.db.collection('amendements').aggregate(query).toArray();
     }
 
-    async projectGroupNewSort(documentId) {
+    async projectGroupStatut(documentId) {
         let query = []
         let match = {}
 
         if (documentId) match.texteLegislatifRef = documentId
 
-        query.push(
-            ...[{
-                    '$match': match
-                },
-                {
-                    '$group': {
-                        '_id': {
-                            'sort': '$sort',
-                            'groupe': '$groupe'
-                        },
-                        'count': {
-                            '$sum': '$count'
-                        }
-                    }
-                }, {
-                    '$group': {
-                        '_id': '$_id.groupe',
-                        'agg': {
-                            '$push': {
-                                'k': '$_id.sort',
-                                'v': '$count'
-                            }
-                        },
-                        'count': {
-                            '$sum': '$count'
-                        }
-                    }
-                }, {
-                    '$project': {
-                        '_id': 0,
-                        'groupe': '$_id',
-                        'res': {
-                            '$arrayToObject': '$agg'
-                        },
-                        'count': 1
-                    }
-                }, {
-                    '$sort': {
-                        'count': -1
+        query = [
+            {
+                '$match': match
+            },
+            {
+                '$group': {
+                    '_id': {
+                        'statut': '$statut',
+                        'groupe': '$groupe'
+                    },
+                    'count': {
+                        '$sum': '$count'
                     }
                 }
-            ]
-        )
+            }, {
+                '$group': {
+                    '_id': '$_id.groupe',
+                    'agg': {
+                        '$push': {
+                            'k': '$_id.statut',
+                            'v': '$count'
+                        }
+                    },
+                    'count': {
+                        '$sum': '$count'
+                    }
+                }
+            }, {
+                '$project': {
+                    '_id': 0,
+                    'groupe': '$_id',
+                    'res': {
+                        '$arrayToObject': '$agg'
+                    },
+                    'count': 1
+                }
+            }, {
+                '$sort': {
+                    'count': -1
+                }
+            }
+        ]
 
-        return MongoUtil.db.collection('amend-group-newSort')
+        return MongoUtil.db.collection('amend-group-statut')
             .aggregate(query)
             .toArray()
             .then(res => res
@@ -217,13 +216,14 @@ class Amendements {
             )
     }
 
-    async projectNewSortDate(sort) {
-
-        return MongoUtil.db.collection('amend-sort-group-date')
-            .findOne({ _id: sort })
+    async projectStatutDate(statut) {
+        let res = await MongoUtil.db.collection('amend-statut-group-date')
+            .findOne({ _id: statut })
+        console.log(res)
+        return res
     }
 
-    async sankyActeurDocumentSort(documentIds, acteurIds) {
+    async sankyActeurDocumentStatut(documentIds, acteurIds) {
         let query = []
         let match = {}
 
@@ -261,7 +261,7 @@ class Amendements {
                         $group: {
                             _id: {
                                 texteLegislatifRef: "$texteLegislatifRef",
-                                sort: "$sort"
+                                statut: "$statut"
                             },
                             count: { $sum: 1 }
                         }
@@ -275,7 +275,7 @@ class Amendements {
         if (res.length) {
             return [
                 ...res[0].t.map(val => ({ source: val._id.auteur, target: val._id.texteLegislatifRef, value: val.count })),
-                ...res[0].u.map(val => ({ source: val._id.texteLegislatifRef, target: val._id.sort, value: val.count })),
+                ...res[0].u.map(val => ({ source: val._id.texteLegislatifRef, target: val._id.statut, value: val.count })),
             ]
         } else {
             return []

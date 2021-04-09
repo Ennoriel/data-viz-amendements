@@ -4,11 +4,12 @@
 	
 	import Nav from './components/Nav.svelte'
 	import Home from './components/Home.svelte'
-	import DeputeeSortHS from './components/StackedHistogram/DeputeeSortHS.svelte'
-	import GroupeNewSortHS from './components/StackedHistogram/GroupeNewSortHS.svelte'
+	import DeputeeStatut from './components/StackedHistogram/DeputeeStatut.svelte'
+	import GroupeStatut from './components/StackedHistogram/GroupeStatut.svelte'
 	import HeatMap from './components/HeatMap.svelte'
 	import SankeyDiagram from './components/SankeyDiagram.svelte'
 	import LinearChart from './components/LinearChart.svelte'
+	// import TextLoi from './components/TextLoi.svelte'
 
 	let selectedRoute
 
@@ -35,7 +36,7 @@
 		{
 			menu: 'par député',
 			title: "Nombre d'amendements par député",
-			component: DeputeeSortHS
+			component: DeputeeStatut
 		},
 		{
 			menu: 'par député 2',
@@ -45,13 +46,18 @@
 		{
 			menu: 'par groupe',
 			title: "Nombre d'amendements par groupe",
-			component: GroupeNewSortHS
+			component: GroupeStatut
 		},
 		{
 			menu: 'dans le temps',
 			title: "Nombre d'amendements dans le temps",
 			component: LinearChart
-		}
+		},
+		// {
+		// 	menu: 'textes (β)',
+		// 	title: "Texte de loi",
+		// 	component: TextLoi
+		// }
 	]
 </script>
 

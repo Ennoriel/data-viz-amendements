@@ -12,7 +12,7 @@
 
   $: {
     working = true
-    send('/api/projectGroupNewSort', { documentId }).then(res => {
+    send('/api/projectAuteurStatut', { documentId }).then(res => {
       data = res
       working = false
     })
@@ -23,5 +23,5 @@
 {#if working}
   <Spinner/>
 {:else}
-  <HistogramStacked {data} getXVal={v => v.groupe}/>
+  <HistogramStacked {data} getXVal={v => v.auteur}/>
 {/if}

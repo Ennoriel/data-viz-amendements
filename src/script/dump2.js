@@ -37,7 +37,7 @@ mongoUtil.init().then(async() => {
             // groupe par sort, auteur, date
             '$group': {
                 '_id': {
-                    'sort': '$sort',
+                    'statut': '$statut',
                     'auteur': '$auteur',
                     'year': '$depot.year',
                     'month': '$depot.month'
@@ -71,7 +71,7 @@ mongoUtil.init().then(async() => {
             // Groupe sur le sort, groupe et date
             '$group': {
                 '_id': {
-                    'sort': '$_id.sort',
+                    'statut': '$_id.statut',
                     'groupe': '$groupe',
                     'year': '$_id.year',
                     'month': '$_id.month'
@@ -90,7 +90,7 @@ mongoUtil.init().then(async() => {
                 },
                 'data': {
                     '$push': {
-                        'sort': '$_id.sort',
+                        'statut': '$_id.statut',
                         'count': '$count'
                     }
                 },
@@ -131,7 +131,7 @@ mongoUtil.init().then(async() => {
             '$group': {
                 '_id': {
                     'groupe': '$_id.groupe',
-                    'sort': '$data.sort'
+                    'statut': '$data.statut'
                 },
                 'records': {
                     '$push': {
@@ -144,7 +144,7 @@ mongoUtil.init().then(async() => {
         }, {
             // Groupe par sort afin d'avoir une structure à deux niveaux
             '$group': {
-                '_id': '$_id.sort',
+                '_id': '$_id.statut',
                 'groupRecords': {
                     '$push': {
                         'records': '$records',
@@ -154,7 +154,7 @@ mongoUtil.init().then(async() => {
             }
         },
         {
-            '$merge': 'amend-sort-group-date'
+            '$merge': 'amend-statut-group-date'
         }
     ]).toArray()
     console.log(new Date().toISOString())

@@ -7,9 +7,8 @@
   export let acteurId
 </script>
 
-<h2>Filtres</h2>
 {#if isDocument}
-  <h3>par projet de loi</h3>
+  <h3>Filtrer par projet de loi</h3>
   <!-- svelte-ignore a11y-no-onchange -->
   <select bind:value={documentId}>
     <option value={''} />
@@ -22,7 +21,7 @@
 {/if}
 
 {#if isActeur}
-  <h3>par député</h3>
+  <h3>Filtrer par député</h3>
   <!-- svelte-ignore a11y-no-onchange -->
   <select bind:value={acteurId}>
     <option value={''} />

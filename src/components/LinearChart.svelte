@@ -14,21 +14,16 @@
   import { send } from '../query.util'
 
   const ref = {
-    sorts: [
-      'A discuter',
+    statuts: [
       'Adopté',
-      'En recevabilité',
       'En traitement',
-      'Irrecevable 40',
       'Irrecevable',
-      'Non soutenu',
-      'Rejeté',
-      'Retiré',
-      'Tombé'
+      'Irrecevable 40',
+      'Non adopté',
     ]
   }
 
-  let sort = 'Irrecevable'
+  let statut = 'Irrecevable'
 
   const margin = {
     top: 10,
@@ -56,10 +51,10 @@
   let gridData
   let flatData
 
-  $: loadCharts(sort)
+  $: loadCharts(statut)
 
   function loadCharts() {
-    send('/api/projectNewSortDate', {sort}).then(res => {
+    send('/api/projectStatutDate', {statut}).then(res => {
 
       data = res.groupRecords.map(groupRecord => ({
                 groupe: groupRecord.groupe,
@@ -211,11 +206,11 @@
   }
 </style>
 
-<h3>Filtrer par sort</h3>
+<h3>Filtrer par statut</h3>
 <!-- svelte-ignore a11y-no-onchange -->
-<select bind:value={sort}>
-  {#each ref.sorts as refSort}
-    <option value={refSort}>{refSort}</option>
+<select bind:value={statut}>
+  {#each ref.statuts as refStatut}
+    <option value={refStatut}>{refStatut}</option>
   {/each}
 </select>
 

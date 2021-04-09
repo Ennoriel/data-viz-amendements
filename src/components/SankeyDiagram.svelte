@@ -32,7 +32,7 @@
 
     const svg = d3Select('#svg-sankey').html("")
 
-    rawData.links = await send('/api/sankyActeurDocumentSort', {documentIds, acteurIds})
+    rawData.links = await send('/api/sankyActeurDocumentStatut', {documentIds, acteurIds})
     rawData.nodes = rawData.links.reduce((acc, link) => {
       acc.push(link.source)
       acc.push(link.target)

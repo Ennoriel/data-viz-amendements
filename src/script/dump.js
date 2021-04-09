@@ -16,9 +16,20 @@ mongoUtil.init().then(async() => {
 
     console.log(new Date().toISOString())
     let res = await mongoUtil.db.collection('amendements').aggregate([{
+        // suppression de données sans date
+        '$match': {
+            'depot.year': {
+                '$exists': 1
+            },
+            'depot.month': {
+                '$exists': 1
+            },
+            'isDepute': true
+        }
+    }, {
             '$group': {
                 '_id': {
-                    'sort': '$sort',
+                    'statut': '$statut',
                     'auteur': '$auteur',
                     'texteLegislatifRef': '$texteLegislatifRef'
                 },
@@ -26,40 +37,40 @@ mongoUtil.init().then(async() => {
                     '$sum': 1
                 }
             }
-        }, {
-            '$addFields': {
-                'newSort': {
-                    '$cond': [{
-                        // '$not': {
-                        '$in': [
-                                '$_id.sort', [
-                                    "Tombé",
-                                    "Retiré",
-                                    "Rejeté",
-                                    "Non soutenu",
-                                    // "Irrecevable 40",
-                                    // "Irrecevable",
-                                    "En traitement",
-                                    "En recevabilité",
-                                    "Adopté",
-                                    "A discuter"
-                                ]
-                            ]
-                            // }
-                    }, 'Autre', '$_id.sort']
-                }
-            }
-        }, {
-            '$group': {
-                '_id': {
-                    'sort': '$newSort',
-                    'auteur': '$_id.auteur',
-                    'texteLegislatifRef': '$_id.texteLegislatifRef'
-                },
-                'count': {
-                    '$sum': '$count'
-                }
-            }
+        // }, {
+        //     '$addFields': {
+        //         'newSort': {
+        //             '$cond': [{
+        //                 '$not': {
+        //                 '$in': [
+        //                         '$_id.sort', [
+        //                         // "Tombé",
+        //                         // "Retiré",
+        //                         // "Rejeté",
+        //                         // "Non soutenu",
+        //                         "Irrecevable 40",
+        //                         "Irrecevable",
+        //                             // "En traitement",
+        //                             // "En recevabilité",
+        //                             // "Adopté",
+        //                             // "A discuter"
+        //                         ]
+        //                     ]
+        //                 }
+        //             }, 'Autre sort', '$_id.sort']
+        //         }
+        //     }
+        // }, {
+        //     '$group': {
+        //         '_id': {
+        //             'sort': '$newSort',
+        //             'auteur': '$_id.auteur',
+        //             'texteLegislatifRef': '$_id.texteLegislatifRef'
+        //         },
+        //         'count': {
+        //             '$sum': '$count'
+        //         }
+        //     }
         }, {
             '$lookup': {
                 'from': 'acteurs',
@@ -83,7 +94,7 @@ mongoUtil.init().then(async() => {
         }, {
             '$group': {
                 '_id': {
-                    'sort': '$_id.sort',
+                    'statut': '$_id.statut',
                     'groupe': '$groupe',
                     'texteLegislatifRef': '$_id.texteLegislatifRef'
                 },
@@ -108,12 +119,12 @@ mongoUtil.init().then(async() => {
                 'groupe': '$_id.groupe',
                 'document': '$document.titre',
                 'texteLegislatifRef': '$document.uid',
-                'sort': '$_id.sort',
+                'statut': '$_id.statut',
                 'count': 1
             }
         },
         {
-            '$merge': 'amend-group-newSort'
+            '$merge': 'amend-group-statut'
         }
     ]).toArray()
     console.log(new Date().toISOString())

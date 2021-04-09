@@ -13,24 +13,24 @@ router.post('/agg', async function(req, res, next) {
     res.send(await Amendements.agg());
 });
 
-router.post('/projectAuteurSort', async function(req, res, next) {
-    res.send(await Amendements.projectAuteurSort(req.body.documentId));
+router.post('/projectAuteurStatut', async function (req, res, next) {
+    res.send(await Amendements.projectAuteurStatut(req.body.documentId));
 });
 
-router.post('/projectGroupNewSort', async function(req, res, next) {
-    res.send(await Amendements.projectGroupNewSort(req.body.documentId));
+router.post('/projectGroupStatut', async function (req, res, next) {
+    res.send(await Amendements.projectGroupStatut(req.body.documentId));
 });
 
 router.post('/projectDayMonth', async function(req, res, next) {
     res.send(await Amendements.projectDayMonth(req.body.documentId, req.body.acteurId));
 });
 
-router.post('/projectNewSortDate', async function(req, res, next) {
-    res.send(await Amendements.projectNewSortDate(req.body.sort));
+router.post('/projectStatutDate', async function (req, res, next) {
+    res.send(await Amendements.projectStatutDate(req.body.statut));
 });
 
-router.post('/sankyActeurDocumentSort', async function(req, res, next) {
-    res.send(await Amendements.sankyActeurDocumentSort(req.body.documentIds, req.body.acteurIds));
+router.post('/sankyActeurDocumentStatut', async function (req, res, next) {
+    res.send(await Amendements.sankyActeurDocumentStatut(req.body.documentIds, req.body.acteurIds));
 });
 
 router.post('/documents', async function(req, res, next) {
